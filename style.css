@@ -1,28 +1,195 @@
-/* style.css */
+/* style.css - "Pastel Sunrise" Theme */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+    /* --- NEW "PASTEL SUNRISE" COLOR PALETTE --- */
+    --bg-main: #fefae0; /* A warm, creamy beige */
+    --bg-card: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+    --text-primary: #5a524c; /* A soft, warm brown-gray */
+    --text-secondary: #e5989b; /* A beautiful, dusty rose for headings */
+    --accent-primary: #ffb4a2; /* A gentle, welcoming peach for buttons */
+    --accent-hover: #f79d84; /* A slightly deeper peach for hover */
+    --border-color: #e6e1da;
+    --error-bg: #fde2e4;
+    --error-text: #d94a4a;
+    --success-bg: #fceede; /* A very light peach for success */
+    --success-text: #a56a59; /* A darker terracotta for success text */
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
     margin: 0;
     line-height: 1.6;
+    
+    /* --- UPDATED PURE CSS BACKGROUND --- */
+    background-color: var(--bg-main); /* Fallback color */
+    
+    /* A 3-layer gradient using the new sunrise colors */
+    background-image: 
+        /* Layer 1: A soft rose glow from the top left */
+        radial-gradient(circle at 15% 25%, rgba(229, 152, 155, 0.15), transparent 40%),
+        /* Layer 2: A soft peach glow from the bottom right */
+        radial-gradient(circle at 85% 75%, rgba(255, 180, 162, 0.2), transparent 40%),
+        /* Layer 3: The base vertical gradient */
+        linear-gradient(to bottom, #fff6e8, #fefae0);
+
+    background-attachment: fixed; /* Keeps the gradient stable on scroll */
 }
-.container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
-header { background: #fff; padding: 1rem 2rem; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-header h1 { margin: 0; font-size: 1.5rem; color: #4a5568; }
-header a { text-decoration: none; background: #e53e3e; color: #fff; padding: 0.5rem 1rem; border-radius: 5px; }
-.card { background: #fff; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-h2 { margin-top: 0; color: #2d3748; }
-h3 { color: #4a5568; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
-.prompt { font-style: italic; color: #718096; }
-form { display: flex; flex-direction: column; }
-textarea, input[type="email"], input[type="password"] { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 1rem; box-sizing: border-box; }
-button { cursor: pointer; background: #4299e1; color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 5px; font-size: 1rem; align-self: flex-start; }
-.mood-selector { display: flex; justify-content: space-around; margin-bottom: 1rem; }
-.mood-selector label { font-size: 2rem; cursor: pointer; }
+
+.container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+header {
+    background: var(--bg-card);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+header a {
+    text-decoration: none;
+    background: var(--error-bg);
+    color: var(--error-text);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+}
+header a:hover {
+    background: var(--error-text);
+    color: #fff;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08); /* Soft shadow for depth */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+h2 {
+    margin-top: 0;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+h3 {
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.prompt {
+    font-style: italic;
+    color: #a4a4a4;
+    background-color: #fdfbf8;
+    padding: 1rem;
+    border-left: 3px solid var(--accent-primary);
+    border-radius: 4px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+textarea, input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+    background-color: #fdfbf8;
+    transition: border-color 0.2s ease;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+}
+
+textarea:focus, input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(255, 180, 162, 0.2);
+}
+
+button {
+    cursor: pointer;
+    background: var(--accent-primary);
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    align-self: flex-start;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background: var(--accent-hover);
+}
+
+/* --- Enhanced Mood Selector --- */
+.mood-selector {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1.5rem;
+}
+.mood-selector label {
+    font-size: 2.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+}
+.mood-selector input[type="radio"] { display: none; }
+.mood-selector input[type="radio"]:checked + label {
+    transform: scale(1.25);
+    background-color: var(--success-bg); /* Use the new light peach highlight */
+}
+
 #mood-history { list-style: none; padding-left: 0; }
-#mood-history li { padding: 0.5rem 0; border-bottom: 1px solid #f0f2f5; }
-/* Auth Page Styles */
+#mood-history li {
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 1.1rem;
+}
+
+/* --- Auth Page Styles --- */
 .auth-page { display: flex; justify-content: center; align-items: center; height: 100vh; }
 .auth-card { width: 100%; max-width: 400px; }
-.error { color: #e53e3e; background: #fed7d7; padding: 0.5rem; border-radius: 5px; }
-.success { color: #2f855a; background: #c6f6d5; padding: 0.5rem; border-radius: 5px; }
+
+.error, .success {
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+.error {
+    color: var(--error-text);
+    background: var(--error-bg);
+}
+.success {
+    color: var(--success-text);
+    background: var(--success-bg);
+}
