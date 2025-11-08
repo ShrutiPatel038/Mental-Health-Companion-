@@ -11,29 +11,34 @@ if (isset($_SESSION['user_id'])) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $db = get_db();
-    $users = $db->users;
+    $conn = get_db();
     $email = $_POST['email'];
     $password = $_POST['password'];
 
     // --- SIGN UP LOGIC ---
     if (isset($_POST['signup'])) {
-        $existingUser = $users->findOne(['email' => $email]);
-        if ($existingUser) {
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        if ($stmt->get_result()->fetch_assoc()) {
             $error = 'Email already exists. Please login.';
         } else {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $users->insertOne(['email' => $email, 'password' => $hashedPassword]);
-            // Redirect to login after successful signup
+            $stmt = $conn->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
+            $stmt->bind_param("ss", $email, $hashedPassword);
+            $stmt->execute();
             header('Location: login.php?signedup=true');
             exit();
         }
     }
     // --- LOGIN LOGIC ---
     else {
-        $user = $users->findOne(['email' => $email]);
+        $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $user = $stmt->get_result()->fetch_assoc();
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = (string)$user['_id'];
+            $_SESSION['user_id'] = $user['id'];
             header('Location: index.php');
             exit();
         } else {

@@ -1,9 +1,15 @@
 <?php
 // db.php
-require 'vendor/autoload.php'; // Include Composer's autoloader
-
 function get_db() {
-    $client = new MongoDB\Client("mongodb://localhost:27017");
-    return $client->mindful_moments; // Selects the 'mindful_moments' database
+    $host = 'localhost';
+    $dbname = 'mindful_moments';
+    $username = 'root';
+    $password = 'pookie2102';
+    
+    $conn = new mysqli($host, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("Database connection failed: " . $conn->connect_error);
+    }
+    return $conn;
 }
 ?>

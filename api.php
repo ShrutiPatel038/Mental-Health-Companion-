@@ -1,28 +1,25 @@
 <?php
 // api.php
 session_start();
-header('Content-Type: application/json'); // We will always return JSON
+header('Content-Type: application/json');
 require 'db.php';
 
-// First, check if the user is logged in for all actions
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit();
 }
 
-$db = get_db();
-$userId = new MongoDB\BSON\ObjectId($_SESSION['user_id']);
+$conn = get_db();
+$userId = (int)$_SESSION['user_id'];
 $action = $_POST['action'] ?? '';
 
 switch ($action) {
     case 'submit_mood':
         $moodValue = (int)($_POST['mood'] ?? 0);
         if ($moodValue >= 1 && $moodValue <= 5) {
-            $db->moods->insertOne([
-                'userId' => $userId,
-                'value' => $moodValue,
-                'date' => new MongoDB\BSON\UTCDateTime()
-            ]);
+            $stmt = $conn->prepare("INSERT INTO moods (user_id, value) VALUES (?, ?)");
+            $stmt->bind_param("ii", $userId, $moodValue);
+            $stmt->execute();
             echo json_encode(['success' => true, 'message' => 'Mood saved!']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid mood value.']);
@@ -30,15 +27,15 @@ switch ($action) {
         break;
 
     case 'get_mood_history':
-        $moods = $db->moods->find(
-            ['userId' => $userId],
-            ['sort' => ['date' => -1], 'limit' => 7] // Get last 7 entries
-        );
+        $stmt = $conn->prepare("SELECT value, date FROM moods WHERE user_id = ? ORDER BY date DESC LIMIT 7");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $history = [];
-        foreach ($moods as $mood) {
+        while ($row = $result->fetch_assoc()) {
             $history[] = [
-                'value' => $mood['value'],
-                'date' => $mood['date']->toDateTime()->format('M d, Y')
+                'value' => (int)$row['value'],
+                'date' => date('M d, Y', strtotime($row['date']))
             ];
         }
         echo json_encode(['success' => true, 'history' => $history]);
@@ -47,11 +44,9 @@ switch ($action) {
     case 'submit_journal':
         $entry = trim($_POST['entry'] ?? '');
         if (!empty($entry)) {
-            $db->journals->insertOne([
-                'userId' => $userId,
-                'entry' => htmlspecialchars($entry), // Sanitize input
-                'date' => new MongoDB\BSON\UTCDateTime()
-            ]);
+            $stmt = $conn->prepare("INSERT INTO journals (user_id, entry) VALUES (?, ?)");
+            $stmt->bind_param("is", $userId, htmlspecialchars($entry));
+            $stmt->execute();
             echo json_encode(['success' => true, 'message' => 'Journal entry saved!']);
         } else {
             echo json_encode(['success' => false, 'message' => 'Journal entry cannot be empty.']);
