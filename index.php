@@ -37,9 +37,12 @@ $dailyPrompt = $journalPrompts[$dayOfYear % count($journalPrompts)];
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+   
     <header>
+        
         <h1>Mindful Moments</h1>
         <a href="logout.php">Logout</a>
+        
     </header>
 
     <main class="container">
@@ -73,6 +76,7 @@ $dailyPrompt = $journalPrompts[$dayOfYear % count($journalPrompts)];
             </form>
         </section>
     </main>
+
 
     <script src="script.js"></script>
 </body>
