@@ -1,17 +1,19 @@
+
 <?php
-// api.php
-session_start();
+
 header('Content-Type: application/json');
 require 'db.php';
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_COOKIE['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit();
 }
 
 $conn = get_db();
-$userId = (int)$_SESSION['user_id'];
+
+$userId = (int)$_COOKIE['user_id'];
 $action = $_POST['action'] ?? '';
+
 
 switch ($action) {
     case 'submit_mood':
@@ -51,6 +53,36 @@ switch ($action) {
         } else {
             echo json_encode(['success' => false, 'message' => 'Journal entry cannot be empty.']);
         }
+        break;
+
+    case 'get_journal_by_date':
+        // The date will come from the frontend as 'YYYY-MM-DD'
+        $date = $_POST['date'] ?? '';
+        
+        if (empty($date)) {
+            echo json_encode(['success' => false, 'message' => 'Date is required.']);
+            exit();
+        }
+
+        // Prepare the query to find entries for the start and end of the given day
+        $startDate = $date . ' 00:00:00';
+        $endDate = $date . ' 23:59:59';
+        
+        $stmt = $conn->prepare("SELECT entry, date FROM journals WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC");
+        $stmt->bind_param("iss", $userId, $startDate, $endDate);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $entries = [];
+        while ($row = $result->fetch_assoc()) {
+            $entries[] = [
+                'entry' => $row['entry'],
+                // Format the time for display
+                'time' => date('h:i A', strtotime($row['date']))
+            ];
+        }
+        
+        echo json_encode(['success' => true, 'entries' => $entries]);
         break;
 
     default:

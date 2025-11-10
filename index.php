@@ -1,14 +1,10 @@
 <?php
-// index.php
-session_start();
 
-// If user is not logged in, redirect to the login page
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_COOKIE['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
-// Simplified Daily Challenge & Prompt Logic (No AI/DB needed!)
 $dayOfYear = date('z'); // Get the day of the year (0-365)
 $challenges = [
     "Take 5 deep, slow breaths, focusing only on your breathing.",
@@ -74,6 +70,20 @@ $dailyPrompt = $journalPrompts[$dayOfYear % count($journalPrompts)];
                 <textarea id="journal-entry" placeholder="Write your thoughts here..." required></textarea>
                 <button type="submit">Save Entry</button>
             </form>
+        </section>
+
+        <section class="card">
+            <h2>My Journal Entries</h2>
+            <form id="show-journal-form">
+                <label for="journal-date">Show entries for date:</label>
+                <input type="date" id="journal-date" required>
+                <button type="submit">Show Entries</button>
+            </form>
+            
+            <!-- This is where the results will be displayed -->
+            <div id="journal-entries-container" class="entries-container">
+                <!-- Entries will be dynamically added here by JavaScript -->
+            </div>
         </section>
     </main>
 

@@ -1,27 +1,30 @@
+
 <?php
-// login.php (Your Original MySQL Logic + New HTML)
-session_start();
+// login.php (Cookie Version)
+// REMOVE: session_start(); is no longer needed here.
 require 'db.php';
 
-// If user is already logged in, send them to the dashboard
-if (isset($_SESSION['user_id'])) {
+// If a user with a valid cookie visits this page, send them to the dashboard
+if (isset($_COOKIE['user_id'])) {
     header('Location: index.php');
     exit();
 }
 
-// --- YOUR EXACT PHP LOGIC ---
+// Your logic remains the same, but we change how the logged-in state is saved
 $error = '';
+$success = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn = get_db();
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // --- SIGN UP LOGIC (triggered by button with name="signup") ---
+    // --- SIGN UP LOGIC ---
     if (isset($_POST['signup'])) {
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
+        $stmt->bind_param("s", anemail);
         $stmt->execute();
-        $result = $stmt->get_result(); // Added this line for clarity, your original logic implied it
+        $result = $stmt->get_result();
 
         if ($result->fetch_assoc()) {
             $error = 'Email already exists. Please login.';
@@ -32,18 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
             $stmt->bind_param("ss", $email, $hashedPassword);
             $stmt->execute();
-            header('Location: login.php?signedup=true'); // Your redirect works perfectly
+            header('Location: login.php?signedup=true');
             exit();
         }
     }
-    // --- LOGIN LOGIC (triggered by any other form submission) ---
+    // --- LOGIN LOGIC ---
     else {
         $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
+
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
+            // This cookie will be named 'user_id', hold the user's ID,
+            // last for 30 days, and be available on the entire site.
+            setcookie('user_id', $user['id'], time() + (86400 * 30), "/"); // 86400 = 1 day
+
             header('Location: index.php');
             exit();
         } else {
@@ -52,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -68,16 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php if ($error && isset($_POST['signup'])): ?><p class="error"><?php echo $error; ?></p><?php endif; ?>
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Password (min 6 characters)" required />
-                <!-- CRITICAL: The name="signup" attribute matches your PHP logic -->
                 <button type="submit" name="signup">Sign Up</button>
             </form>
         </div>
 
-        <!-- SIGN IN (LOGIN) FORM -->
         <div class="form-container sign-in-container">
             <form action="login.php" method="POST">
                 <h1>Sign In</h1>
-                <!-- This logic correctly displays errors for the login form -->
                 <?php if ($error && !isset($_POST['signup'])): ?><p class="error"><?php echo $error; ?></p><?php endif; ?>
                 <!-- This logic correctly displays the success message after signup redirect -->
                 <?php if (isset($_GET['signedup'])): ?><p class="success">Signup successful! Please log in.</p><?php endif; ?>
