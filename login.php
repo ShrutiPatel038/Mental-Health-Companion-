@@ -1,7 +1,7 @@
 
 <?php
-// login.php (Cookie Version)
-// REMOVE: session_start(); is no longer needed here.
+// login.php (DEFINITIVE COOKIE VERSION)
+// NO session_start() needed.
 require 'db.php';
 
 // If a user with a valid cookie visits this page, send them to the dashboard
@@ -10,19 +10,19 @@ if (isset($_COOKIE['user_id'])) {
     exit();
 }
 
-// Your logic remains the same, but we change how the logged-in state is saved
 $error = '';
 $success = '';
+$containerClass = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn = get_db();
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // --- SIGN UP LOGIC ---
     if (isset($_POST['signup'])) {
+        $containerClass = 'right-panel-active';
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->bind_param("s", anemail);
+        $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -39,17 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
     }
-    // --- LOGIN LOGIC ---
     else {
         $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
-
         if ($user && password_verify($password, $user['password'])) {
-            // This cookie will be named 'user_id', hold the user's ID,
-            // last for 30 days, and be available on the entire site.
-            setcookie('user_id', $user['id'], time() + (86400 * 30), "/"); // 86400 = 1 day
+            // ✅ THIS IS THE KEY: Set a cookie.
+            setcookie('user_id', $user['id'], time() + (86400 * 30), "/"); // Cookie lasts for 30 days
 
             header('Location: index.php');
             exit();
@@ -59,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -68,7 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="auth-page">
 
-    <div class="auth-container" id="auth-container">
+    <!--  3. Echo the PHP variable directly into the class attribute -->
+    <div class="auth-container <?php echo $containerClass; ?>" id="auth-container">
+        
         <!-- SIGN UP FORM -->
         <div class="form-container sign-up-container">
             <form action="login.php" method="POST">
@@ -80,15 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
+        <!-- SIGN IN (LOGIN) FORM -->
         <div class="form-container sign-in-container">
             <form action="login.php" method="POST">
                 <h1>Sign In</h1>
                 <?php if ($error && !isset($_POST['signup'])): ?><p class="error"><?php echo $error; ?></p><?php endif; ?>
-                <!-- This logic correctly displays the success message after signup redirect -->
                 <?php if (isset($_GET['signedup'])): ?><p class="success">Signup successful! Please log in.</p><?php endif; ?>
                 <input type="email" name="email" placeholder="Email" required />
                 <input type="password" name="password" placeholder="Password" required />
-                <!-- This button correctly triggers the 'else' block in your PHP -->
                 <button type="submit">Sign In</button>
             </form>
         </div>
